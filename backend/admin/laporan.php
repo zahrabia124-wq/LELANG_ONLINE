@@ -11,12 +11,23 @@ if (!isset($_SESSION['id_petugas'])) {
 $id_level = $_SESSION['id_level']; 
 
 // Ambil data laporan lelang digabung dengan tb_barang dan tb_masyarakat
-$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_masyarakat.nama_lengkap 
+// (foto & deskripsi_barang ditambahkan supaya bisa ditampilkan di modal detail)
+$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, 
+                 tb_barang.deskripsi_barang, tb_barang.foto, tb_masyarakat.nama_lengkap 
           FROM tb_lelang 
           JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang 
           LEFT JOIN tb_masyarakat ON tb_lelang.id_user = tb_masyarakat.id_user 
           ORDER BY tb_lelang.id_lelang DESC";
 $result = mysqli_query($conn, $query);
+
+// Simpan semua baris ke array supaya bisa dipakai dua kali:
+// 1) untuk isi tabel, 2) untuk generate modal detail masing-masing barang
+$laporan_data = [];
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $laporan_data[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -86,6 +97,19 @@ $result = mysqli_query($conn, $query);
             padding: 0.35rem 0.65rem;
             font-size: 0.813rem;
             border-radius: 6px;
+        }
+        .foto-detail-modal {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            background-color: #e9ecef;
+        }
+        .img-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
         /* Styling khusus saat halaman dicetak (Print) */
@@ -169,8 +193,8 @@ $result = mysqli_query($conn, $query);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (mysqli_num_rows($result) > 0) : ?>
-                        <?php $no = 1; while ($row = mysqli_fetch_assoc($result)) : ?>
+                    <?php if (count($laporan_data) > 0) : ?>
+                        <?php $no = 1; foreach ($laporan_data as $row) : ?>
                         <tr>
                             <td class="text-center fw-semibold text-secondary"><?= $no++; ?></td>
                             <td class="fw-bold text-dark"><?= htmlspecialchars($row['nama_barang']); ?></td>
@@ -186,12 +210,13 @@ $result = mysqli_query($conn, $query);
                                 <?php endif; ?>
                             </td>
                             <td class="text-center col-aksi">
-                                <a href="history_lelang.php?id_lelang=<?= $row['id_lelang']; ?>" class="btn btn-info btn-action text-white shadow-sm" title="Lihat History Penawaran">
+                                <!-- Tombol Detail sekarang membuka modal, tidak pindah halaman -->
+                                <button type="button" class="btn btn-info btn-action text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDetail<?= $row['id_lelang']; ?>">
                                     <i class="fas fa-history"></i> Detail
-                                </a>
+                                </button>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4">
@@ -207,6 +232,104 @@ $result = mysqli_query($conn, $query);
         </div>
     </div>
 </div>
+
+<!-- Modal Detail per barang -->
+<?php foreach ($laporan_data as $row) : ?>
+    <?php
+        $fotoPath = (!empty($row['foto']) && file_exists("img/" . $row['foto']))
+            ? "img/" . htmlspecialchars($row['foto'])
+            : "https://via.placeholder.com/500x350?text=No+Image";
+
+        // Ambil riwayat penawaran untuk barang/sesi lelang ini
+        $query_hist = "SELECT history_lelang.*, tb_masyarakat.nama_lengkap 
+                        FROM history_lelang 
+                        LEFT JOIN tb_masyarakat ON history_lelang.id_user = tb_masyarakat.id_user
+                        WHERE history_lelang.id_lelang = ?
+                        ORDER BY history_lelang.penawaran_harga DESC";
+        $stmt_hist = mysqli_prepare($conn, $query_hist);
+        mysqli_stmt_bind_param($stmt_hist, "i", $row['id_lelang']);
+        mysqli_stmt_execute($stmt_hist);
+        $result_hist = mysqli_stmt_get_result($stmt_hist);
+    ?>
+    <div class="modal fade" id="modalDetail<?= $row['id_lelang']; ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 14px; border: none;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="fas fa-box text-primary me-2"></i><?= htmlspecialchars($row['nama_barang']); ?>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-5">
+                            <img src="<?= $fotoPath; ?>" class="foto-detail-modal" alt="<?= htmlspecialchars($row['nama_barang']); ?>">
+                        </div>
+                        <div class="col-md-7">
+                            <p class="text-muted mb-3"><?= nl2br(htmlspecialchars($row['deskripsi_barang'])); ?></p>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <span class="text-secondary small d-block">Harga Awal</span>
+                                    <span class="fw-bold text-dark">Rp <?= number_format($row['harga_awal'], 0, ',', '.'); ?></span>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <span class="text-secondary small d-block">Harga Akhir</span>
+                                    <span class="fw-bold text-success"><?= $row['harga_akhir'] ? 'Rp ' . number_format($row['harga_akhir'], 0, ',', '.') : '-'; ?></span>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <span class="text-secondary small d-block">Tgl Lelang</span>
+                                    <span class="fw-semibold text-dark"><i class="far fa-calendar-alt me-1"></i> <?= $row['tgl_lelang']; ?></span>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <span class="text-secondary small d-block">Status</span>
+                                    <?php if ($row['status'] == 'dibuka') : ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">Dibuka</span>
+                                    <?php else : ?>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill">Ditutup</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php if (isset($row['nama_lengkap']) && $row['nama_lengkap']) : ?>
+                                <span class="fw-semibold text-dark"><i class="fas fa-user-check text-success me-1"></i> Pemenang: <?= htmlspecialchars($row['nama_lengkap']); ?></span>
+                            <?php else : ?>
+                                <span class="text-muted fst-italic">Belum ada pemenang</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mb-3"><i class="fas fa-list me-2"></i>Riwayat Penawaran</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="py-2">Penawar</th>
+                                    <th class="py-2">Harga Ditawar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($result_hist && mysqli_num_rows($result_hist) > 0) : ?>
+                                    <?php while ($h = mysqli_fetch_assoc($result_hist)) : ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($h['nama_lengkap'] ?? 'Masyarakat'); ?></td>
+                                            <td><span class="text-success fw-semibold">Rp <?= number_format($h['penawaran_harga'], 0, ',', '.'); ?></span></td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else : ?>
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted py-3">Belum ada penawaran untuk barang ini.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

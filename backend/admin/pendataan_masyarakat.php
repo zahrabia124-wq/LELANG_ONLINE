@@ -10,6 +10,14 @@ if (!isset($_SESSION['id_petugas'])) {
 $id_level = $_SESSION['id_level']; 
 $query = "SELECT * FROM tb_masyarakat ORDER BY id_user DESC"; 
 $result = mysqli_query($conn, $query);
+
+// Simpan ke array supaya bisa dipakai 2x: buat baris tabel & buat generate modal detail
+$masyarakat_data = [];
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $masyarakat_data[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -69,6 +77,22 @@ $result = mysqli_query($conn, $query);
         }
         .table td { vertical-align: middle; color: #212529; }
         .btn-action { padding: 0.35rem 0.65rem; font-size: 0.813rem; border-radius: 6px; }
+        .detail-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #e7f1ff;
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
+        .detail-row {
+            border-bottom: 1px solid #f0f2f5;
+            padding: 10px 0;
+        }
+        .detail-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -128,20 +152,20 @@ $result = mysqli_query($conn, $query);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($result && mysqli_num_rows($result) > 0) : ?>
-                        <?php $no = 1; while ($row = mysqli_fetch_assoc($result)) : ?>
+                    <?php if (count($masyarakat_data) > 0) : ?>
+                        <?php $no = 1; foreach ($masyarakat_data as $row) : ?>
                         <tr>
                             <td class="text-center fw-semibold text-secondary"><?= $no++; ?></td>
                             <td class="fw-bold text-dark"><i class="fas fa-user text-primary me-2"></i> <?= htmlspecialchars($row['nama_lengkap']); ?></td>
                             <td><span class="text-muted">@<?= htmlspecialchars($row['username']); ?></span></td>
                             <td><?= htmlspecialchars($row['telp']); ?></td>
                             <td class="text-center">
-                                <a href="history_lelang.php?id_user=<?= $row['id_user']; ?>" class="btn btn-info btn-action text-white shadow-sm" title="Lihat History Penawaran User">
-                                    <i class="fas fa-history"></i> History
-                                </a>
+                                <button type="button" class="btn btn-info btn-action text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDetail<?= $row['id_user']; ?>" title="Lihat Detail Masyarakat">
+                                    <i class="fas fa-eye"></i> Detail
+                                </button>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
                             <td colspan="5" class="text-center text-muted py-4">
@@ -155,6 +179,60 @@ $result = mysqli_query($conn, $query);
         </div>
     </div>
 </div>
+
+<!-- Modal Detail per masyarakat -->
+<?php foreach ($masyarakat_data as $row) : ?>
+    <div class="modal fade" id="modalDetail<?= $row['id_user']; ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 14px; border: none;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="fas fa-id-card text-primary me-2"></i>Detail Masyarakat
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="detail-avatar me-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0"><?= htmlspecialchars($row['nama_lengkap']); ?></h5>
+                            <span class="text-muted">@<?= htmlspecialchars($row['username']); ?></span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row d-flex justify-content-between">
+                        <span class="text-secondary"><i class="fas fa-phone me-2"></i>No. Telepon</span>
+                        <span class="fw-semibold text-dark"><?= htmlspecialchars($row['telp']); ?></span>
+                    </div>
+
+                    <?php if (!empty($row['email'])) : ?>
+                        <div class="detail-row d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fas fa-envelope me-2"></i>Email</span>
+                            <span class="fw-semibold text-dark"><?= htmlspecialchars($row['email']); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($row['alamat'])) : ?>
+                        <div class="detail-row d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fas fa-map-marker-alt me-2"></i>Alamat</span>
+                            <span class="fw-semibold text-dark text-end" style="max-width: 60%;"><?= htmlspecialchars($row['alamat']); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="detail-row d-flex justify-content-between">
+                        <span class="text-secondary"><i class="fas fa-hashtag me-2"></i>ID Pengguna</span>
+                        <span class="fw-semibold text-dark">#<?= $row['id_user']; ?></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

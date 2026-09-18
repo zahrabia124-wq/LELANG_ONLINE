@@ -11,7 +11,15 @@ if (!isset($_SESSION['id_petugas'])) {
 $id_level = $_SESSION['id_level'];
 
 // Ambil data barang dari database
-$query  = "SELECT * FROM tb_barang ORDER BY id_barang DESC";
+// Barang yang SUDAH LAKU (sesi lelangnya berstatus 'ditutup' DAN sudah ada pemenang/harga_akhir)
+// tidak ditampilkan lagi di sini, karena sudah selesai transaksinya.
+// Data barangnya tetap aman tersimpan di database untuk keperluan History & Laporan.
+$query  = "SELECT tb_barang.* FROM tb_barang
+           WHERE tb_barang.id_barang NOT IN (
+               SELECT tb_lelang.id_barang FROM tb_lelang
+               WHERE tb_lelang.status = 'ditutup' AND tb_lelang.harga_akhir IS NOT NULL
+           )
+           ORDER BY tb_barang.id_barang DESC";
 $result = mysqli_query($conn, $query);
 
 // Pesan notifikasi
@@ -136,6 +144,7 @@ if (isset($_GET['status'])) {
                 <?php else : ?>
                     Status Login: <span class="badge bg-success">Petugas</span> (Akses Pendataan Barang)
                 <?php endif; ?>
+                <span class="text-muted ms-2"><i class="fas fa-circle-info me-1"></i>Barang yang sudah laku terjual otomatis tidak ditampilkan di sini</span>
             </small>
         </div>
 

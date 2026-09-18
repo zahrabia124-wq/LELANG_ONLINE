@@ -9,8 +9,9 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'masyarakat') {
 }
 
 $nama_masyarakat = $_SESSION['nama'] ?? 'Pengguna';
-// Ambil data barang yang status lelangnya 'dibuka'
-$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_barang.deskripsi_barang 
+// Ambil data barang yang status lelangnya 'dibuka' (termasuk kolom foto)
+$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, 
+                 tb_barang.deskripsi_barang, tb_barang.foto
           FROM tb_lelang 
           JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang 
           WHERE tb_lelang.status = 'dibuka'";
@@ -33,6 +34,10 @@ $result = mysqli_query($conn, $query);
         .sidebar a:hover, .sidebar a.active { background-color: rgba(255, 255, 255, 0.15); color: white; transform: translateX(4px); }
         .main-content { margin-left: 260px; padding: 30px; }
         .card-custom { border: none; border-radius: 12px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); background: #ffffff; }
+        .card-img-barang { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; background-color: #e9ecef; }
+        .card-link { text-decoration: none; color: inherit; }
+        .card-link:hover .card-custom { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+        .card-custom { transition: all 0.2s ease; }
     </style>
 </head>
 <body>
@@ -43,7 +48,7 @@ $result = mysqli_query($conn, $query);
     <div class="flex-grow-1">
         <a href="dashboard.php"><i class="fas fa-tachometer-alt me-3 fa-fw"></i> Dashboard</a>
         <a href="daftar_barang.php" class="active"><i class="fas fa-box me-3 fa-fw"></i> Daftar Barang Lelang</a>
-        <a href="penawaran_saya.php"><i class="fas fa-gavel me-3 fa-fw"></i> Penawaran Saya</a>
+        <a href="riwayat_penawaran.php"><i class="fas fa-gavel me-3 fa-fw"></i> Penawaran Saya</a>
     </div>
     <div class="p-3 mb-2">
         <a href="logout.php" class="btn btn-danger w-100 text-white shadow-sm py-2 rounded-pill"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
@@ -62,24 +67,34 @@ $result = mysqli_query($conn, $query);
     <div class="row">
         <?php if ($result && mysqli_num_rows($result) > 0) : ?>
             <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+                <?php
+                    $fotoPath = (!empty($row['foto']) && file_exists("img/" . $row['foto']))
+                        ? "img/" . htmlspecialchars($row['foto'])
+                        : "https://via.placeholder.com/400x300?text=No+Image";
+                ?>
                 <div class="col-md-4 mb-4">
-                    <div class="card card-custom h-100 p-3">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold text-primary mb-2">
-                                <i class="fas fa-box me-2"></i><?= htmlspecialchars($row['nama_barang']); ?>
-                            </h5>
-                            <p class="text-muted small mb-3"><?= htmlspecialchars($row['deskripsi_barang']); ?></p>
-                            
-                            <div class="mb-3 mt-auto">
-                                <span class="text-secondary small d-block">Harga Awal:</span>
-                                <span class="fw-semibold text-dark fs-5">Rp <?= number_format($row['harga_awal'], 0, ',', '.'); ?></span>
-                            </div>
+                    <!-- Seluruh kartu jadi link menuju halaman detail barang -->
+                    <a href="detail_barang.php?id_lelang=<?= $row['id_lelang']; ?>" class="card-link">
+                        <div class="card card-custom h-100 p-3">
+                            <img src="<?= $fotoPath; ?>" class="card-img-barang mb-3" alt="<?= htmlspecialchars($row['nama_barang']); ?>">
+                            <div class="card-body d-flex flex-column p-0">
+                                <h5 class="card-title fw-bold text-primary mb-2">
+                                    <i class="fas fa-box me-2"></i><?= htmlspecialchars($row['nama_barang']); ?>
+                                </h5>
+                                <p class="text-muted small mb-3"><?= htmlspecialchars($row['deskripsi_barang']); ?></p>
 
-                            <a href="penawaran_saya.php?id_lelang=<?= $row['id_lelang']; ?>" class="btn btn-primary w-100 btn-sm rounded-pill py-2 shadow-sm">
-                                <i class="fas fa-gavel me-1"></i> Tawar Barang Ini
-                            </a>
+                                <div class="mb-3 mt-auto">
+                                    <span class="text-secondary small d-block">Harga Awal:</span>
+                                    <span class="fw-semibold text-dark fs-5">Rp <?= number_format($row['harga_awal'], 0, ',', '.'); ?></span>
+                                </div>
+
+                                <!-- Tombol Tawar Barang Ini dipindah ke halaman detail_barang.php -->
+                                <span class="btn btn-outline-primary w-100 btn-sm rounded-pill py-2">
+                                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             <?php endwhile; ?>
         <?php else : ?>

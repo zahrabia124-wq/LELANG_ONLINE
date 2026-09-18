@@ -75,12 +75,34 @@ if (isset($_GET['tutup'])) {
 }
 
 // Ambil data lelang digabung dengan tb_barang dan tb_masyarakat
-$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_masyarakat.nama_lengkap 
+// Termasuk foto, tanggal input barang, dan deskripsi barang (untuk ditampilkan di modal Detail)
+$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_barang.foto,
+                 tb_barang.tgl AS tgl_input_barang, tb_barang.deskripsi_barang,
+                 tb_masyarakat.nama_lengkap 
           FROM tb_lelang 
           JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang 
           LEFT JOIN tb_masyarakat ON tb_lelang.id_user = tb_masyarakat.id_user 
           ORDER BY tb_lelang.id_lelang DESC";
 $result = mysqli_query($conn, $query);
+
+// Simpan semua baris lelang ke array (supaya bisa dipakai 2x: bikin baris tabel & bikin modal)
+$data_lelang = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $data_lelang[] = $row;
+}
+
+// Ambil semua riwayat penawaran sekaligus, lalu kelompokkan per id_lelang
+// supaya tidak perlu query berulang-ulang di dalam loop
+$history_by_lelang = [];
+$q_history = mysqli_query($conn, "SELECT history_lelang.id_lelang, history_lelang.penawaran_harga, tb_masyarakat.nama_lengkap
+                                   FROM history_lelang
+                                   LEFT JOIN tb_masyarakat ON history_lelang.id_user = tb_masyarakat.id_user
+                                   ORDER BY history_lelang.penawaran_harga DESC");
+if ($q_history) {
+    while ($h = mysqli_fetch_assoc($q_history)) {
+        $history_by_lelang[$h['id_lelang']][] = $h;
+    }
+}
 
 // Ambil data barang yang BELUM dilelang untuk pilihan di modal/form buka lelang
 $q_barang = mysqli_query($conn, "SELECT * FROM tb_barang WHERE id_barang NOT IN (SELECT id_barang FROM tb_lelang)");
@@ -105,6 +127,10 @@ $q_barang = mysqli_query($conn, "SELECT * FROM tb_barang WHERE id_barang NOT IN 
         .table td { vertical-align: middle; color: #212529; }
         .btn-action { padding: 0.35rem 0.75rem; font-size: 0.875rem; border-radius: 6px; }
         .form-control, .form-select { padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #dee2e6; }
+        .img-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .img-modal-detail { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; background-color: #e9ecef; }
+        .detail-label { font-size: 0.8rem; color: #6c757d; margin-bottom: 2px; }
+        .detail-value { font-weight: 600; color: #212529; margin-bottom: 14px; }
     </style>
 </head>
 <body>
@@ -171,20 +197,33 @@ $q_barang = mysqli_query($conn, "SELECT * FROM tb_barang WHERE id_barang NOT IN 
                 <thead>
                     <tr>
                         <th class="py-3 text-center" style="width: 5%;">No</th>
-                        <th class="py-3" style="width: 18%;">Nama Barang</th>
-                        <th class="py-3" style="width: 12%;">Tgl Lelang</th>
-                        <th class="py-3" style="width: 15%;">Harga Awal</th>
-                        <th class="py-3" style="width: 15%;">Harga Akhir</th>
-                        <th class="py-3" style="width: 15%;">Pemenang</th>
+                        <th class="py-3 text-center" style="width: 8%;">Foto</th>
+                        <th class="py-3" style="width: 15%;">Nama Barang</th>
+                        <th class="py-3" style="width: 10%;">Tgl Lelang</th>
+                        <th class="py-3" style="width: 13%;">Harga Awal</th>
+                        <th class="py-3" style="width: 13%;">Harga Akhir</th>
+                        <th class="py-3" style="width: 13%;">Pemenang</th>
                         <th class="py-3 text-center" style="width: 10%;">Status</th>
-                        <th class="py-3 text-center" style="width: 10%;">Aksi</th>
+                        <th class="py-3 text-center" style="width: 13%;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (mysqli_num_rows($result) > 0) : ?>
-                        <?php $no = 1; while ($row = mysqli_fetch_assoc($result)) : ?>
+                    <?php if (count($data_lelang) > 0) : ?>
+                        <?php $no = 1; foreach ($data_lelang as $row) : ?>
+                        <?php
+                            $fotoPath = (!empty($row['foto']) && file_exists("img/" . $row['foto']))
+                                ? "img/" . htmlspecialchars($row['foto'])
+                                : null;
+                        ?>
                         <tr>
                             <td class="text-center fw-semibold text-secondary"><?= $no++; ?></td>
+                            <td class="text-center">
+                                <?php if ($fotoPath) : ?>
+                                    <img src="<?= $fotoPath; ?>" alt="<?= htmlspecialchars($row['nama_barang']); ?>" class="img-thumb">
+                                <?php else : ?>
+                                    <span class="badge bg-secondary">No Image</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="fw-bold text-dark"><?= htmlspecialchars($row['nama_barang']); ?></td>
                             <td><span class="text-muted"><i class="far fa-calendar-alt me-1"></i> <?= $row['tgl_lelang']; ?></span></td>
                             <td><span class="text-secondary fw-semibold">Rp <?= number_format($row['harga_awal'], 0, ',', '.'); ?></span></td>
@@ -200,28 +239,28 @@ $q_barang = mysqli_query($conn, "SELECT * FROM tb_barang WHERE id_barang NOT IN 
                             <td class="text-center">
                                 <!-- Kontrol Aksi Berdasarkan Hak Akses UKK -->
                                 <?php if ($id_level == 1) : ?>
-                                    <!-- Administrator hanya bisa melihat detail/history -->
-                                    <a href="history_lelang.php?id_lelang=<?= $row['id_lelang']; ?>" class="btn btn-info btn-action text-white shadow-sm" title="Lihat History Penawaran">
-                                        <i class="fas fa-history"></i> Detail
-                                    </a>
+                                    <!-- Administrator hanya bisa melihat detail (modal) -->
+                                    <button type="button" class="btn btn-info btn-action text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDetail<?= $row['id_lelang']; ?>" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
                                 <?php else : ?>
-                                    <!-- Petugas bisa menutup lelang jika status dibuka, atau melihat detail jika sudah ditutup -->
+                                    <!-- Petugas bisa menutup lelang jika status dibuka, atau lihat detail jika sudah ditutup -->
                                     <?php if ($row['status'] == 'dibuka') : ?>
                                         <a href="kelola_lelang.php?tutup=<?= $row['id_lelang']; ?>" class="btn btn-danger btn-action shadow-sm" onclick="return confirm('Tutup sesi lelang ini dan tentukan pemenang?')">
                                             <i class="fas fa-lock me-1"></i> Tutup
                                         </a>
                                     <?php else : ?>
-                                        <a href="history_lelang.php?id_lelang=<?= $row['id_lelang']; ?>" class="btn btn-info btn-action text-white shadow-sm" title="Lihat History Penawaran">
-                                            <i class="fas fa-history"></i> Detail
-                                        </a>
+                                        <button type="button" class="btn btn-info btn-action text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDetail<?= $row['id_lelang']; ?>" title="Lihat Detail">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </button>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <div class="py-3">
                                     <i class="fas fa-balance-scale fa-3x text-secondary mb-3 opacity-50"></i>
                                     <p class="mb-0">Belum ada sesi lelang yang dibuka.</p>
@@ -268,6 +307,88 @@ $q_barang = mysqli_query($conn, "SELECT * FROM tb_barang WHERE id_barang NOT IN 
     </div>
 </div>
 <?php endif; ?>
+
+<!-- Modal Detail per Barang (satu modal untuk tiap baris lelang) -->
+<?php foreach ($data_lelang as $row) : ?>
+    <?php
+        $fotoModal = (!empty($row['foto']) && file_exists("img/" . $row['foto']))
+            ? "img/" . htmlspecialchars($row['foto'])
+            : "https://via.placeholder.com/500x300?text=No+Image";
+        $riwayat = $history_by_lelang[$row['id_lelang']] ?? [];
+    ?>
+    <div class="modal fade" id="modalDetail<?= $row['id_lelang']; ?>" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-bottom px-4 py-3">
+                    <h5 class="modal-title fw-bold text-dark">Detail Barang & Riwayat Penawaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <img src="<?= $fotoModal; ?>" class="img-modal-detail" alt="<?= htmlspecialchars($row['nama_barang']); ?>">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="detail-label">Nama Barang</div>
+                            <div class="detail-value fs-5"><?= htmlspecialchars($row['nama_barang']); ?></div>
+
+                            <div class="detail-label">Tanggal Input Barang</div>
+                            <div class="detail-value"><i class="far fa-calendar-alt me-1"></i> <?= htmlspecialchars($row['tgl_input_barang']); ?></div>
+
+                            <div class="detail-label">Deskripsi</div>
+                            <div class="detail-value fw-normal text-muted" style="font-weight: 400 !important;"><?= nl2br(htmlspecialchars($row['deskripsi_barang'])); ?></div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="detail-label">Harga Awal</div>
+                                    <div class="detail-value">Rp <?= number_format($row['harga_awal'], 0, ',', '.'); ?></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="detail-label">Harga Akhir</div>
+                                    <div class="detail-value text-success"><?= $row['harga_akhir'] ? 'Rp ' . number_format($row['harga_akhir'], 0, ',', '.') : '-'; ?></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="fw-bold text-dark mb-3"><i class="fas fa-history me-2"></i>Riwayat Penawaran</h6>
+                    <?php if (count($riwayat) > 0) : ?>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Penawar</th>
+                                        <th class="text-end">Harga Ditawar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($riwayat as $i => $h) : ?>
+                                        <tr>
+                                            <td>
+                                                <?= htmlspecialchars($h['nama_lengkap'] ?? 'Masyarakat'); ?>
+                                                <?php if ($i === 0) : ?>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">Tertinggi</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-end fw-semibold text-success">Rp <?= number_format($h['penawaran_harga'], 0, ',', '.'); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else : ?>
+                        <p class="text-muted text-center py-3 mb-0"><i class="fas fa-inbox me-2"></i>Belum ada penawaran untuk barang ini.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer border-top px-4 py-3">
+                    <button type="button" class="btn btn-light px-4 rounded-pill border" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
