@@ -106,7 +106,7 @@ if ($result) {
         <a href="kelola_lelang.php"><i class="fas fa-balance-scale me-3 fa-fw"></i> Kelola Lelang</a>
         <a href="history_lelang.php"><i class="fas fa-history me-3 fa-fw"></i> History Lelang</a>
         <a href="laporan.php"><i class="fas fa-file-alt me-3 fa-fw"></i> Generate Laporan</a>
-        <a href="data_masyarakat.php" class="active"><i class="fas fa-users me-3 fa-fw"></i> Data Masyarakat</a>
+        <a href="pendataan_masyarakat.php" class="active"><i class="fas fa-users me-3 fa-fw"></i> Data Masyarakat</a>
 
         <?php if ($id_level == 1) : ?>
             <hr class="text-white-50 mx-4 my-3">
