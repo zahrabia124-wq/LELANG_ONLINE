@@ -1,149 +1,119 @@
- <section id="portfolio" class="portfolio section">
+<section id="portfolio" class="portfolio section">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Portfolio</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div><!-- End Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Penawaran Saya</h2>
+    <p>Pantau barang yang pernah kamu tawar beserta statusnya</p>
+  </div>
 
-      <div class="container">
+  <div class="container">
 
-        <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+    <?php if ($role == '') : ?>
 
-          <ul class="portfolio-filters isotope-filters" data-aos="fade-up" data-aos-delay="100">
-            <li data-filter="*" class="filter-active">All</li>
-            <li data-filter=".filter-app">App</li>
-            <li data-filter=".filter-product">Product</li>
-            <li data-filter=".filter-branding">Branding</li>
-            <li data-filter=".filter-books">Books</li>
-          </ul><!-- End Portfolio Filters -->
-
-          <div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/app-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/app-1.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">App 1</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/product-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/product-1.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Product 1</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/branding-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/branding-1.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Branding 1</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/books-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/books-1.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Books 1</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/app-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/app-2.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">App 2</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Product 2</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/branding-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/branding-2.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Branding 2</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/books-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/books-2.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Books 2</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/app-3.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/app-3.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">App 3</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/product-3.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/product-3.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Product 3</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/branding-3.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/branding-3.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Branding 3</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-            <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-              <div class="portfolio-content h-100">
-                <a href="frontend/template/assets/img/portfolio/books-3.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="assets/img/portfolio/books-3.jpg" class="img-fluid" alt=""></a>
-                <div class="portfolio-info">
-                  <h4><a href="portfolio-details.html" title="More Details">Books 3</a></h4>
-                  <p>Lorem ipsum, dolor sit amet consectetur</p>
-                </div>
-              </div>
-            </div><!-- End Portfolio Item -->
-
-          </div><!-- End Portfolio Container -->
-
-        </div>
-
+      <!-- 1. Belum login -->
+      <div class="empty-state">
+        <i class="bi bi-lock"></i>
+        <p class="mt-3 mb-3 fw-semibold">Login dulu untuk melihat penawaranmu.</p>
+        <a href="backend/admin/index.php" class="btn btn-accent rounded-pill px-4">Login</a>
+        <a href="backend/admin/register_masyarakat.php" class="btn btn-outline-accent rounded-pill px-4">Daftar</a>
       </div>
 
-    </section><!-- /Portfolio Section -->
+    <?php elseif ($role == 'petugas') : ?>
+
+      <!-- 2. Login sebagai petugas -->
+      <div class="empty-state">
+        <i class="bi bi-person-badge"></i>
+        <p class="mt-3 mb-3 fw-semibold">Bagian ini khusus akun masyarakat.</p>
+        <a href="backend/admin/history_lelang.php" class="btn btn-accent rounded-pill px-4">Lihat History Lelang</a>
+      </div>
+
+    <?php else : ?>
+
+      <?php
+        // 3. Login sebagai masyarakat: ambil semua barang yang pernah ditawar
+        $id_user = (int) $_SESSION['id_user'];
+
+        $query = "SELECT history_lelang.id_lelang,
+                         MAX(history_lelang.penawaran_harga) AS tawaran_saya,
+                         tb_barang.nama_barang, tb_barang.foto,
+                         tb_lelang.status, tb_lelang.harga_akhir,
+                         tb_lelang.id_user AS id_pemenang
+                  FROM history_lelang
+                  JOIN tb_lelang ON history_lelang.id_lelang = tb_lelang.id_lelang
+                  JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang
+                  WHERE history_lelang.id_user = $id_user
+                  GROUP BY history_lelang.id_lelang, tb_barang.nama_barang, tb_barang.foto,
+                           tb_lelang.status, tb_lelang.harga_akhir, tb_lelang.id_user
+                  ORDER BY history_lelang.id_lelang DESC";
+        $hasil = mysqli_query($conn, $query);
+      ?>
+
+      <?php if (mysqli_num_rows($hasil) == 0) : ?>
+
+        <div class="empty-state">
+          <i class="bi bi-hammer"></i>
+          <p class="mt-3 mb-3 fw-semibold">Kamu belum pernah menawar barang.</p>
+          <a href="#services" class="btn btn-accent rounded-pill px-4">Cari barang lelang</a>
+        </div>
+
+      <?php else : ?>
+
+        <div class="row gy-4">
+          <?php while ($row = mysqli_fetch_assoc($hasil)) : ?>
+            <?php
+              $id_lelang = (int) $row['id_lelang'];
+
+              // Tentukan status: berlangsung / menang / kalah
+              if ($row['status'] == 'dibuka') {
+                  $label = 'Sedang berlangsung';
+                  $warna = 'info';
+              } elseif ($row['id_pemenang'] == $id_user) {
+                  $label = 'Menang';
+                  $warna = 'success';
+              } else {
+                  $label = 'Kalah';
+                  $warna = 'secondary';
+              }
+
+              // Tawaran tertinggi saat ini (dari semua penawar)
+              $q = mysqli_query($conn, "SELECT MAX(penawaran_harga) AS tertinggi
+                                        FROM history_lelang WHERE id_lelang = $id_lelang");
+              $tertinggi = mysqli_fetch_assoc($q)['tertinggi'];
+
+              // Foto barang
+              $foto = 'frontend/template/assets/img/portfolio/product-1.jpg';
+              if (!empty($row['foto']) && file_exists(__DIR__ . '/../../backend/admin/img/' . $row['foto'])) {
+                  $foto = 'backend/admin/img/' . $row['foto'];
+              }
+            ?>
+
+            <div class="col-lg-4 col-md-6">
+              <div class="lelang-card">
+                <img class="thumb" src="<?= $foto ?>" alt="<?= htmlspecialchars($row['nama_barang']) ?>">
+
+                <div class="body">
+                  <h4><?= htmlspecialchars($row['nama_barang']) ?></h4>
+                  <span class="badge bg-<?= $warna ?> align-self-start mb-3"><?= $label ?></span>
+
+                  <div class="label">Tawaran tertinggimu</div>
+                  <div class="price">Rp <?= number_format($row['tawaran_saya'], 0, ',', '.') ?></div>
+
+                  <?php if ($row['status'] == 'dibuka') : ?>
+                    <small class="text-muted">Tertinggi saat ini: Rp <?= number_format($tertinggi, 0, ',', '.') ?></small>
+                    <a href="backend/admin/detail_barang.php?id_lelang=<?= $id_lelang ?>" class="btn btn-accent rounded-pill w-100 mt-3">Tawar Lagi</a>
+                  <?php else : ?>
+                    <small class="text-muted">Harga akhir: Rp <?= number_format($row['harga_akhir'], 0, ',', '.') ?></small>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+
+          <?php endwhile; ?>
+        </div>
+
+      <?php endif; ?>
+
+    <?php endif; ?>
+
+  </div>
+
+</section>

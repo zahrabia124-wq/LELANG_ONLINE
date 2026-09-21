@@ -1,72 +1,96 @@
-  <section id="services" class="services section">
+<?php
+// Ambil barang lelang yang statusnya "dibuka" (maksimal 6)
+$query = "SELECT tb_lelang.id_lelang, tb_barang.nama_barang, tb_barang.harga_awal,
+                 tb_barang.deskripsi_barang, tb_barang.foto
+          FROM tb_lelang
+          JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang
+          WHERE tb_lelang.status = 'dibuka'
+          ORDER BY tb_lelang.id_lelang DESC
+          LIMIT 6";
+$hasil = mysqli_query($conn, $query);
+?>
+<section id="services" class="services section">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Services</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div><!-- End Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Produk Lelang</h2>
+    <p>Barang yang sedang dilelang dan siap kamu tawar</p>
+  </div>
 
-      <div class="container">
+  <div class="container">
 
-        <div class="row gy-4">
+    <?php if (mysqli_num_rows($hasil) == 0) : ?>
 
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="100">
-            <div class="icon flex-shrink-0"><i class="bi bi-briefcase"></i></div>
-            <div>
-              <h4 class="title">Lorem Ipsum</h4>
-              <p class="description">Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
-          <!-- End Service Item -->
-
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="200">
-            <div class="icon flex-shrink-0"><i class="bi bi-card-checklist"></i></div>
-            <div>
-              <h4 class="title">Dolor Sitema</h4>
-              <p class="description">Minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat tarad limino ata</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div><!-- End Service Item -->
-
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="300">
-            <div class="icon flex-shrink-0"><i class="bi bi-bar-chart"></i></div>
-            <div>
-              <h4 class="title">Sed ut perspiciatis</h4>
-              <p class="description">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div><!-- End Service Item -->
-
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="400">
-            <div class="icon flex-shrink-0"><i class="bi bi-binoculars"></i></div>
-            <div>
-              <h4 class="title">Magni Dolores</h4>
-              <p class="description">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div><!-- End Service Item -->
-
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="500">
-            <div class="icon flex-shrink-0"><i class="bi bi-brightness-high"></i></div>
-            <div>
-              <h4 class="title">Nemo Enim</h4>
-              <p class="description">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div><!-- End Service Item -->
-
-          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="600">
-            <div class="icon flex-shrink-0"><i class="bi bi-calendar4-week"></i></div>
-            <div>
-              <h4 class="title">Eiusmod Tempor</h4>
-              <p class="description">Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi</p>
-              <a href="service-details.html" class="readmore stretched-link"><span>Learn More</span><i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div><!-- End Service Item -->
-
-        </div>
-
+      <!-- Kalau belum ada barang -->
+      <div class="empty-state">
+        <i class="bi bi-box-seam"></i>
+        <p class="mt-3 mb-0 fw-semibold">Belum ada barang lelang yang dibuka.</p>
       </div>
 
-    </section><!-- /Services Section -->
+    <?php else : ?>
+
+      <div class="row gy-4">
+        <?php while ($row = mysqli_fetch_assoc($hasil)) : ?>
+          <?php
+            $id_lelang = (int) $row['id_lelang'];
+
+            // Cari tawaran tertinggi + jumlah tawaran untuk barang ini
+            $q = mysqli_query($conn, "SELECT MAX(penawaran_harga) AS tertinggi, COUNT(*) AS jumlah
+                                      FROM history_lelang WHERE id_lelang = $id_lelang");
+            $tawaran = mysqli_fetch_assoc($q);
+
+            // Kalau belum ada yang menawar, tampilkan harga awal
+            if ($tawaran['tertinggi'] > 0) {
+                $judul_harga = 'Tawaran tertinggi';
+                $harga = $tawaran['tertinggi'];
+            } else {
+                $judul_harga = 'Harga awal';
+                $harga = $row['harga_awal'];
+            }
+
+            // Foto barang (kalau file tidak ada, pakai gambar cadangan)
+            $foto = 'frontend/template/assets/img/portfolio/product-1.jpg';
+            if (!empty($row['foto']) && file_exists(__DIR__ . '/../../backend/admin/img/' . $row['foto'])) {
+                $foto = 'backend/admin/img/' . $row['foto'];
+            }
+          ?>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up">
+            <div class="lelang-card">
+              <img class="thumb" src="<?= $foto ?>" alt="<?= htmlspecialchars($row['nama_barang']) ?>">
+
+              <div class="body">
+                <h4><?= htmlspecialchars($row['nama_barang']) ?></h4>
+                <p class="desc"><?= htmlspecialchars($row['deskripsi_barang']) ?></p>
+
+                <div class="mt-auto mb-3">
+                  <div class="label"><?= $judul_harga ?></div>
+                  <div class="price">Rp <?= number_format($harga, 0, ',', '.') ?></div>
+                  <small class="text-muted"><?= $tawaran['jumlah'] ?> tawaran</small>
+                </div>
+
+                <!-- Tombol berbeda tergantung siapa yang login -->
+                <?php if ($role == 'masyarakat') : ?>
+                  <a href="backend/admin/detail_barang.php?id_lelang=<?= $id_lelang ?>" class="btn btn-accent rounded-pill w-100">Lihat &amp; Tawar</a>
+                <?php elseif ($role == 'petugas') : ?>
+                  <a href="backend/admin/kelola_lelang.php" class="btn btn-outline-accent rounded-pill w-100">Kelola Lelang</a>
+                <?php else : ?>
+                  <a href="backend/admin/index.php" class="btn btn-outline-accent rounded-pill w-100">Login untuk Menawar</a>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+        <?php endwhile; ?>
+      </div>
+
+      <?php if ($role == 'masyarakat') : ?>
+        <div class="text-center mt-5">
+          <a href="backend/admin/daftar_barang.php" class="btn btn-accent rounded-pill px-4">Lihat semua barang lelang</a>
+        </div>
+      <?php endif; ?>
+
+    <?php endif; ?>
+
+  </div>
+
+</section>
