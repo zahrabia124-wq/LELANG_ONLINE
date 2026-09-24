@@ -23,11 +23,18 @@ if (isset($_POST['buka_lelang'])) {
         $id_petugas = $_SESSION['id_petugas'];
         $status = 'dibuka';
 
+        // Ambil foto barang dari tb_barang, untuk disalin ke tb_lelang
+        $foto_barang = null;
+        $q_foto = mysqli_query($conn, "SELECT foto FROM tb_barang WHERE id_barang = '$id_barang'");
+        if ($q_foto && mysqli_num_rows($q_foto) > 0) {
+            $foto_barang = mysqli_fetch_assoc($q_foto)['foto'];
+        }
+
         // Cek apakah barang sudah pernah dilelang sebelumnya
         $cek = mysqli_query($conn, "SELECT * FROM tb_lelang WHERE id_barang = '$id_barang'");
         if (mysqli_num_rows($cek) == 0) {
-            $stmt = mysqli_prepare($conn, "INSERT INTO tb_lelang (id_barang, tgl_lelang, id_petugas, status) VALUES (?, ?, ?, ?)");
-            mysqli_stmt_bind_param($stmt, "isis", $id_barang, $tgl_lelang, $id_petugas, $status);
+            $stmt = mysqli_prepare($conn, "INSERT INTO tb_lelang (id_barang, tgl_lelang, id_petugas, status, foto) VALUES (?, ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "isiss", $id_barang, $tgl_lelang, $id_petugas, $status, $foto_barang);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
             header("Location: kelola_lelang.php?status=dibuka");
@@ -76,7 +83,10 @@ if (isset($_GET['tutup'])) {
 
 // Ambil data lelang digabung dengan tb_barang dan tb_masyarakat
 // Termasuk foto, tanggal input barang, dan deskripsi barang (untuk ditampilkan di modal Detail)
-$query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_barang.foto,
+$query = "SELECT tb_lelang.id_lelang, tb_lelang.id_barang, tb_lelang.tgl_lelang, tb_lelang.harga_akhir,
+                 tb_lelang.id_user, tb_lelang.id_petugas, tb_lelang.status,
+                 tb_lelang.foto AS foto_lelang,
+                 tb_barang.nama_barang, tb_barang.harga_awal, tb_barang.foto AS foto_barang,
                  tb_barang.tgl AS tgl_input_barang, tb_barang.deskripsi_barang,
                  tb_masyarakat.nama_lengkap 
           FROM tb_lelang 
@@ -86,8 +96,10 @@ $query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal, tb_ba
 $result = mysqli_query($conn, $query);
 
 // Simpan semua baris lelang ke array (supaya bisa dipakai 2x: bikin baris tabel & bikin modal)
+// Foto diutamakan dari tb_lelang; kalau kosong (data lama sebelum kolom ini ada), pakai foto tb_barang
 $data_lelang = [];
 while ($row = mysqli_fetch_assoc($result)) {
+    $row['foto'] = !empty($row['foto_lelang']) ? $row['foto_lelang'] : $row['foto_barang'];
     $data_lelang[] = $row;
 }
 

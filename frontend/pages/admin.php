@@ -440,11 +440,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi'])) {
                     } elseif ($sudah) {
                         $pesan_error = 'Barang ini sudah terdaftar dalam sesi lelang!';
                     } else {
+                        // PERBAIKAN: kolom tb_lelang.foto wajib terisi (NOT NULL, tanpa default),
+                        // jadi fotonya disalin dari tb_barang saat lelang dibuka.
                         $hasil = adm_jalankan(
                             $conn,
-                            "INSERT INTO tb_lelang (id_barang, tgl_lelang, id_petugas, status) VALUES (?, ?, ?, 'dibuka')",
-                            'isi',
-                            array($id_barang, date('Y-m-d'), (int) ($_SESSION['id_petugas'] ?? 0))
+                            "INSERT INTO tb_lelang (id_barang, tgl_lelang, id_petugas, status, foto)
+                             SELECT id_barang, ?, ?, 'dibuka', COALESCE(foto, '')
+                             FROM tb_barang WHERE id_barang = ?",
+                            'sii',
+                            array(date('Y-m-d'), (int) ($_SESSION['id_petugas'] ?? 0), $id_barang)
                         );
                         if ($hasil >= 0) {
                             adm_redirect('lelang', 'Sesi lelang berhasil dibuka.');

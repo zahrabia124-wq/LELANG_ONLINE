@@ -11,6 +11,11 @@ $lelang_selesai = mysqli_fetch_assoc($q)['total'];
 
 $q = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_masyarakat");
 $total_peserta = mysqli_fetch_assoc($q)['total'];
+
+// Section "Tentang" cuma untuk pengunjung & masyarakat, bukan petugas/admin
+if (($_SESSION['role'] ?? '') === 'petugas') {
+    return;
+}
 ?>
 <section id="about" class="about section">
 
