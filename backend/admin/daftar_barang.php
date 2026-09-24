@@ -14,7 +14,8 @@ $query = "SELECT tb_lelang.*, tb_barang.nama_barang, tb_barang.harga_awal,
                  tb_barang.deskripsi_barang, tb_barang.foto
           FROM tb_lelang 
           JOIN tb_barang ON tb_lelang.id_barang = tb_barang.id_barang 
-          WHERE tb_lelang.status = 'dibuka'";
+          WHERE tb_lelang.status = 'dibuka'
+          ORDER BY tb_lelang.id_lelang DESC";
 $result = mysqli_query($conn, $query);
 ?>
 
@@ -70,7 +71,7 @@ $result = mysqli_query($conn, $query);
                 <?php
                     $fotoPath = (!empty($row['foto']) && file_exists("img/" . $row['foto']))
                         ? "img/" . htmlspecialchars($row['foto'])
-                        : "https://via.placeholder.com/400x300?text=No+Image";
+                        : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23e9ecef'/%3E%3Ctext x='50%25' y='50%25' fill='%236c757d' font-size='24' text-anchor='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
                 ?>
                 <div class="col-md-4 mb-4">
                     <!-- Seluruh kartu jadi link menuju halaman detail barang -->

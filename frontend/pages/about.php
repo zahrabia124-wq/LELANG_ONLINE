@@ -16,20 +16,29 @@ $total_peserta = mysqli_fetch_assoc($q)['total'];
 
   <div class="container section-title" data-aos="fade-up">
     <h2>Tentang</h2>
-    <p>Cara mudah dan transparan untuk mendapatkan barang lewat lelang</p>
+    <p>Mengenal apa itu Kelola Lelang</p>
   </div>
 
   <div class="container">
     <div class="row gy-5">
 
-      <!-- Kiri: cara ikut lelang -->
+      <!-- Kiri: pengertian kelola lelang, bahasa sederhana -->
       <div class="content col-xl-5 d-flex flex-column" data-aos="fade-up" data-aos-delay="100">
-        <h3>Bagaimana cara ikut lelang?</h3>
+        <h3>Apa itu Kelola Lelang?</h3>
         <p>
-          1. Daftar akun masyarakat lalu login.<br>
-          2. Pilih barang yang sedang dibuka di Produk Lelang.<br>
-          3. Ajukan penawaran harga terbaikmu.<br>
-          4. Saat lelang ditutup petugas, penawar tertinggi jadi pemenang.
+          Kelola Lelang adalah cara petugas mengatur barang mana yang boleh dilelang, kapan lelangnya dibuka,
+          dan kapan lelangnya ditutup.
+        </p>
+        <p>
+          Sederhananya begini: petugas mendata barang yang mau dijual, lalu membuka lelangnya di sistem ini.
+          Setelah dibuka, barang itu muncul di halaman Produk Lelang dan siapa saja yang sudah punya akun
+          masyarakat bisa mengajukan tawaran harga. Saat petugas menutup lelang, tawaran tertinggi otomatis
+          jadi pemenang.
+        </p>
+        <p class="mb-0">
+          Jadi, kalau kamu lihat status barang <strong>"Dibuka"</strong>, artinya lelangnya masih berjalan dan
+          kamu masih bisa menawar. Kalau statusnya <strong>"Ditutup"</strong>, artinya lelang sudah selesai dan
+          sudah ada pemenangnya.
         </p>
       </div>
 

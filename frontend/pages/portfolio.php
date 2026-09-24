@@ -13,8 +13,8 @@
       <div class="empty-state">
         <i class="bi bi-lock"></i>
         <p class="mt-3 mb-3 fw-semibold">Login dulu untuk melihat penawaranmu.</p>
-        <a href="backend/admin/index.php" class="btn btn-accent rounded-pill px-4">Login</a>
-        <a href="backend/admin/register_masyarakat.php" class="btn btn-outline-accent rounded-pill px-4">Daftar</a>
+        <a href="index.php?form=login#hero" class="btn btn-accent rounded-pill px-4">Login</a>
+        <a href="index.php?form=daftar#hero" class="btn btn-outline-accent rounded-pill px-4">Daftar</a>
       </div>
 
     <?php elseif ($role == 'petugas') : ?>
@@ -99,7 +99,7 @@
 
                   <?php if ($row['status'] == 'dibuka') : ?>
                     <small class="text-muted">Tertinggi saat ini: Rp <?= number_format($tertinggi, 0, ',', '.') ?></small>
-                    <a href="backend/admin/detail_barang.php?id_lelang=<?= $id_lelang ?>" class="btn btn-accent rounded-pill w-100 mt-3">Tawar Lagi</a>
+                    <a href="index.php?id_lelang=<?= $id_lelang ?>#services" class="btn btn-accent rounded-pill w-100 mt-3">Tawar Lagi</a>
                   <?php else : ?>
                     <small class="text-muted">Harga akhir: Rp <?= number_format($row['harga_akhir'], 0, ',', '.') ?></small>
                   <?php endif; ?>

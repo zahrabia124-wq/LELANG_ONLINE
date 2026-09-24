@@ -24,12 +24,22 @@ ob_start();
 include __DIR__ . '/../pages/about.php';
 $isi_about = ob_get_clean();
 
+// Section "services" dan "portfolio" isinya BEDA tergantung siapa yang login:
+//   - masyarakat / pengunjung : services.php (produk lelang) + portfolio.php (penawaran saya)
+//   - petugas / administrator : admin.php (panel kelola barang, lelang, dll.)
+//                               portfolio dikosongkan karena khusus masyarakat
 ob_start();
-include __DIR__ . '/../pages/services.php';
+if ($role === 'petugas') {
+    include __DIR__ . '/../pages/admin.php';
+} else {
+    include __DIR__ . '/../pages/services.php';
+}
 $isi_services = ob_get_clean();
 
 ob_start();
-include __DIR__ . '/../pages/portfolio.php';
+if ($role !== 'petugas') {
+    include __DIR__ . '/../pages/portfolio.php';
+}
 $isi_portfolio = ob_get_clean();
 
 
